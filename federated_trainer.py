@@ -62,7 +62,7 @@ if __name__ == "__main__":
     best_eval_acc = 0.0
     for round_num in range(1, args.n_rounds+1):
         state, tff_metrics = iterative_process.next(state, federated_train_data)
-        eval_model = model_select((32, 32, 3),5)
+        eval_model = model_select(args.model_name, input_shape, n_classes)
         eval_model.compile(optimizer=optimizers.Adam(learning_rate=args.client_lr),
                            loss=losses.SparseCategoricalCrossentropy(),
                            metrics=[metrics.SparseCategoricalAccuracy()])

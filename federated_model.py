@@ -28,8 +28,10 @@ def model_select(model_name, input_shape, n_class):
 	return keras_model
 
 def get_federated_model_from_keras(model_name, input_shape, input_spec, n_class):
-	return tff.learning.from_keras_model(
-		model_select(model_name, input_shape, n_class),
-		input_spec=input_spec,
-		loss=losses.SparseCategoricalCrossentropy(),
-		metrics=[metrics.SparseCategoricalAccuracy()])
+	def model_fn():
+		return tff.learning.from_keras_model(
+			model_select(model_name, input_shape, n_class),
+			input_spec=input_spec,
+			loss=losses.SparseCategoricalCrossentropy(),
+			metrics=[metrics.SparseCategoricalAccuracy()])
+	return model_fn
