@@ -30,7 +30,7 @@ if __name__ == "__main__":
     parser.add_argument('--crop_shape', default=32, type=int, help='Crop size.')
 
     parser.add_argument('--save_dir', default='models', type=str, help='The path where the model is saved.')
-    parser.add_argument('--result_dir', default='results', type=str, help='The path where the result is saved.')
+    parser.add_argument('--results_dir', default='results', type=str, help='The path where the result is saved.')
 
     args = parser.parse_args()
 
