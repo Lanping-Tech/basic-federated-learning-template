@@ -34,8 +34,8 @@ def get_client_train_dataset(data, label, n_clients):
 		end = image_per_set * i
 
 		print(f"Adding data from {start} to {end} for client : {client_name}")
-		data = collections.OrderedDict((('label', label[start:end]), ('pixels', data[start:end])))
-		client_train_dataset[client_name] = data
+		client_dataset = collections.OrderedDict((('label', label[start:end]), ('pixels', data[start:end])))
+		client_train_dataset[client_name] = client_dataset
 	return client_train_dataset, image_per_set
 
 def data_preprocess(dataset, n_epochs, shuffle_buffer, batch_size, crop_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE):
