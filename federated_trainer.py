@@ -37,8 +37,8 @@ if __name__ == "__main__":
     if not os.path.exists(args.save_dir):
         os.makedirs(args.save_dir)
 
-    if not os.path.exists(args.result_dir):
-        os.makedirs(args.result_dir)
+    if not os.path.exists(args.results_dir):
+        os.makedirs(args.results_dir)
 
     input_shape = (args.crop_shape, args.crop_shape, 3)
 
