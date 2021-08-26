@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     input_shape = (args.crop_shape, args.crop_shape, 3)
 
-    federated_train_data, x_test, y_test, n_classes = load_federated_data(args.dataset_path, args.n_client, args.n_epochs, args.batch_size, args.crop_shape)
+    federated_train_data, x_test, y_test, n_classes = load_federated_data(args.dataset_path, args.n_clients, args.n_epochs, args.batch_size, args.crop_shape)
 
     federated_model = get_federated_model_from_keras(args.model_name, input_shape, federated_train_data[0].element_spec, n_classes)
 

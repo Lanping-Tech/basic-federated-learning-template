@@ -25,10 +25,10 @@ def load_numpy_data(data_path):
 	Y = Y.astype(np.float32)
 	return X, Y
 
-def get_client_train_dataset(data, label, n_client):
-	image_per_set = int(np.floor(len(data) / n_client))
+def get_client_train_dataset(data, label, n_clients):
+	image_per_set = int(np.floor(len(data) / n_clients))
 	client_train_dataset = collections.OrderedDict()
-	for i in range(1, n_client+1):
+	for i in range(1, n_clients+1):
 		client_name = "client_" + str(i)
 		start = image_per_set * (i-1)
 		end = image_per_set * i
@@ -47,11 +47,11 @@ def data_preprocess(dataset, n_epochs, shuffle_buffer, batch_size, crop_shape, n
 
 	return dataset.repeat(n_epochs).shuffle(shuffle_buffer).batch(batch_size).map(batch_format_fn, num_parallel_calls)
 
-def load_federated_data(data_path, n_client, n_epochs, batch_size, crop_shape):
+def load_federated_data(data_path, n_clients, n_epochs, batch_size, crop_shape):
 	X, Y = load_numpy_data(data_path)
 	x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.3)
 
-	client_train_dataset, shuffle_buffer = get_client_train_dataset(x_train, y_train, n_client)
+	client_train_dataset, shuffle_buffer = get_client_train_dataset(x_train, y_train, n_clients)
 
 	train_dataset = tff.simulation.datasets.TestClientData(client_train_dataset)
 
