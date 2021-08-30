@@ -6,6 +6,6 @@
 
 ## References
 
-[tensorflow-federated](https://github.com/tensorflow/federated)
+[tensorflow federated](https://github.com/tensorflow/federated)
 
 [federated guide](https://github.com/google-research/federated)
