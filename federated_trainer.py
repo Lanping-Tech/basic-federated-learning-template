@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
     input_shape = (args.crop_shape, args.crop_shape, 3)
 
-    federated_train_data, x_test, y_test, n_classes = load_federated_data(args.dataset_path, args.n_clients, args.n_epochs, args.batch_size, args.crop_shape)
+    federated_train_data, federated_test_data, n_classes = load_federated_data(args.dataset_path, args.n_clients, args.n_epochs, args.batch_size, args.crop_shape)
 
     federated_model = get_federated_model_from_keras(args.model_name, input_shape, federated_train_data[0].element_spec, n_classes)
 
@@ -62,25 +62,17 @@ if __name__ == "__main__":
     best_eval_acc = 0.0
     for round_num in range(1, args.n_rounds+1):
         state, tff_metrics = iterative_process.next(state, federated_train_data)
-        eval_model = model_select(args.model_name, input_shape, n_classes)
-        eval_model.compile(optimizer=optimizers.Adam(learning_rate=args.client_lr),
-                           loss=losses.SparseCategoricalCrossentropy(),
-                           metrics=[metrics.SparseCategoricalAccuracy()])
 
-        state.model.assign_weights_to(eval_model)
-
-        ev_result = eval_model.evaluate(x_test, y_test, verbose=0)
-
-        if ev_result[1] > best_eval_acc:
-            best_eval_acc = ev_result[1]
-            best_eval_model = eval_model
+        eval_fn = tff.learning.build_federated_evaluation(federated_model, use_experimental_simulation_loop=True)
+        current_model = iterative_process.get_model_weights(state)
+        validation_metrics = eval_fn(current_model, federated_test_data) # test data
         
         print('round {:2d}, metrics={}'.format(round_num, tff_metrics))
-        print(f"Eval loss : {ev_result[0]} and Eval accuracy : {ev_result[1]}")
+        print(f"Eval loss : {validation_metrics['sparse_categorical_accuracy']} and Eval accuracy : {validation_metrics['loss']}")
         train_acc.append(float(tff_metrics['train']['sparse_categorical_accuracy']))
-        val_acc.append(ev_result[1])
+        val_acc.append(validation_metrics['sparse_categorical_accuracy'])
         train_loss.append(float(tff_metrics['train']['loss']))
-        val_loss.append(ev_result[0])
+        val_loss.append(validation_metrics['loss'])
 
     metric_collection = {"train_acc": train_acc,
                          "val_acc": val_acc,

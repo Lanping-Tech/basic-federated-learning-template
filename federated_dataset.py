@@ -38,6 +38,20 @@ def get_client_train_dataset(data, label, n_clients):
 		client_train_dataset[client_name] = client_dataset
 	return client_train_dataset, image_per_set
 
+def get_client_test_dataset(data, label, n_clients):
+	image_per_set = int(np.floor(len(data) / n_clients))
+	print('image_per_set:',image_per_set)
+	client_test_dataset = collections.OrderedDict()
+	for i in range(1, n_clients+1):
+		client_name = "client_" + str(i)
+		start = image_per_set * (i-1)
+		end = image_per_set * i
+
+		print(f"Adding data from {start} to {end} for client : {client_name}")
+		client_dataset = collections.OrderedDict((('label', label[start:end]), ('pixels', data[start:end])))
+		client_test_dataset[client_name] = client_dataset
+	return client_test_dataset, image_per_set
+
 def data_preprocess(dataset, n_epochs, shuffle_buffer, batch_size, crop_shape, num_parallel_calls=tf.data.experimental.AUTOTUNE):
 
 	def batch_format_fn(element):
@@ -58,8 +72,9 @@ def load_federated_data(data_path, n_clients, n_epochs, batch_size, crop_shape):
 	federated_train_data = [data_preprocess(train_dataset.create_tf_dataset_for_client(client_id), n_epochs, shuffle_buffer, batch_size, crop_shape) 
 											for client_id in train_dataset.client_ids]
 
-	x_test = tf.image.resize_with_crop_or_pad(x_test, target_height=crop_shape, target_width=crop_shape)
-	x_test = tf.image.per_image_standardization(x_test)
-	y_test = reshape(y_test, [-1, 1])
+	client_test_dataset, shuffle_buffer = get_client_test_dataset(x_test, y_test, n_clients)
+	test_dataset = tff.simulation.FromTensorSlicesClientData(client_test_dataset)
+	federated_test_data = [data_preprocess(test_dataset.create_tf_dataset_for_client(client_id), 1, shuffle_buffer, batch_size, crop_shape) 
+	 										for client_id in test_dataset.client_ids]
 
-	return federated_train_data, x_test, y_test, len(np.unique(y_train))
+	return federated_train_data, federated_test_data, len(np.unique(y_train))
