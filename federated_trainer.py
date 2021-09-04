@@ -70,7 +70,7 @@ if __name__ == "__main__":
         validation_metrics = eval_fn(current_model, federated_test_data) # test data
         
         print('round {:2d}, metrics={}'.format(round_num, tff_metrics))
-        print(f"Eval loss : {validation_metrics['categorical_accuracy']} and Eval accuracy : {validation_metrics['loss']}")
+        print(f"Eval loss : {validation_metrics['loss']} and Eval accuracy : {validation_metrics['categorical_accuracy']}")
         train_acc.append(float(tff_metrics['train']['categorical_accuracy']))
         val_acc.append(validation_metrics['categorical_accuracy'])
         train_loss.append(float(tff_metrics['train']['loss']))
