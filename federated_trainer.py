@@ -12,14 +12,16 @@ from federated_dataset import load_federated_data
 from federated_model import model_select, get_federated_model_from_keras
 
 from utils.plot_result import plot_result
+import nest_asyncio
+nest_asyncio.apply()
 
 if __name__ == "__main__":
 
     # Parsing arguments and setting hyper-parameters
     parser = argparse.ArgumentParser(description='train', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--experiment_name', default='Federated_Learning', type=str, help='Federated learning experiment name.')
-    parser.add_argument('--model_name', default='vgg16', type=str, choices=['vgg16', 'resnet50'], help='Federated learning model name.')
-    parser.add_argument('--dataset_path', default='data', type=str, help='Federated learning dataset path.')
+    parser.add_argument('--model_name', default='resnet50', type=str, choices=['vgg16', 'resnet50'], help='Federated learning model name.')
+    parser.add_argument('--dataset_path', default='dataset', type=str, help='Federated learning dataset path.')
 
     parser.add_argument('--n_clients', default=5, type=int, help='Number of clients')
     parser.add_argument('--n_epochs', default=5, type=int, help='Number of epochs')
@@ -27,7 +29,7 @@ if __name__ == "__main__":
     parser.add_argument('--client_lr', default=1e-3, type=float, help='Client learning rate.')
     parser.add_argument('--server_lr', default=1e-3, type=float, help='Server learning rate.')
     parser.add_argument('--batch_size', default=8, type=int, help='Batch size.')
-    parser.add_argument('--crop_shape', default=32, type=int, help='Crop size.')
+    parser.add_argument('--crop_shape', default=64, type=int, help='Crop size.')
 
     parser.add_argument('--save_dir', default='models', type=str, help='The path where the model is saved.')
     parser.add_argument('--results_dir', default='results', type=str, help='The path where the result is saved.')
@@ -49,7 +51,7 @@ if __name__ == "__main__":
     iterative_process = tff.learning.build_federated_averaging_process(
         federated_model,
         client_optimizer_fn=lambda: optimizers.Adam(learning_rate=args.client_lr),
-        server_optimizer_fn=lambda: optimizers.SGD(learning_rate=args.server_lr))
+        server_optimizer_fn=lambda: optimizers.Adam(learning_rate=args.server_lr))
 
     state = iterative_process.initialize()
 
@@ -63,14 +65,14 @@ if __name__ == "__main__":
     for round_num in range(1, args.n_rounds+1):
         state, tff_metrics = iterative_process.next(state, federated_train_data)
 
-        eval_fn = tff.learning.build_federated_evaluation(federated_model, use_experimental_simulation_loop=True)
+        eval_fn = tff.learning.build_federated_evaluation(federated_model)
         current_model = iterative_process.get_model_weights(state)
         validation_metrics = eval_fn(current_model, federated_test_data) # test data
         
         print('round {:2d}, metrics={}'.format(round_num, tff_metrics))
-        print(f"Eval loss : {validation_metrics['sparse_categorical_accuracy']} and Eval accuracy : {validation_metrics['loss']}")
-        train_acc.append(float(tff_metrics['train']['sparse_categorical_accuracy']))
-        val_acc.append(validation_metrics['sparse_categorical_accuracy'])
+        print(f"Eval loss : {validation_metrics['categorical_accuracy']} and Eval accuracy : {validation_metrics['loss']}")
+        train_acc.append(float(tff_metrics['train']['categorical_accuracy']))
+        val_acc.append(validation_metrics['categorical_accuracy'])
         train_loss.append(float(tff_metrics['train']['loss']))
         val_loss.append(validation_metrics['loss'])
 
