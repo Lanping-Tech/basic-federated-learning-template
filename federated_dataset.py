@@ -92,14 +92,14 @@ def load_federated_data(data_path, n_clients, n_epochs, batch_size, crop_shape):
     client_train_dataset, shuffle_buffer = get_client_train_dataset(
         x_train, y_train, n_clients)
 
-    train_dataset = tff.simulation.FromTensorSlicesClientData(
+    train_dataset = tff.simulation.datasets.TestClientData(
         client_train_dataset)
 
     federated_train_data = [data_preprocess(train_dataset.create_tf_dataset_for_client(client_id), n_epochs, shuffle_buffer, batch_size, crop_shape) for client_id in train_dataset.client_ids]
 
     client_test_dataset, shuffle_buffer = get_client_test_dataset(
         x_test, y_test, n_clients)
-    test_dataset = tff.simulation.FromTensorSlicesClientData(
+    test_dataset = tff.simulation.datasets.TestClientData(
         client_test_dataset)
     federated_test_data = [data_preprocess(test_dataset.create_tf_dataset_for_client(client_id), 1, shuffle_buffer, batch_size, crop_shape)
                            for client_id in test_dataset.client_ids]
