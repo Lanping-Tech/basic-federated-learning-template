@@ -9,18 +9,20 @@ from tensorflow.keras import losses, metrics, optimizers
 import tensorflow_federated as tff
 
 from federated_dataset import load_federated_data
-from federated_model import model_select, get_federated_model_from_keras
+from federated_model import get_federated_model_from_keras
 
 from utils.plot_result import plot_result
 import nest_asyncio
 nest_asyncio.apply()
+
+tff.backends.native.set_local_execution_context(clients_per_thread=5)
 
 if __name__ == "__main__":
 
     # Parsing arguments and setting hyper-parameters
     parser = argparse.ArgumentParser(description='train', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('--experiment_name', default='Federated_Learning', type=str, help='Federated learning experiment name.')
-    parser.add_argument('--model_name', default='resnet50', type=str, choices=['vgg16', 'resnet50'], help='Federated learning model name.')
+    parser.add_argument('--model_name', default='resnet18', type=str, choices=['resnet18', 'resnet34', 'resnet50', 'resnet101', 'resnet152'], help='Federated learning model name.')
     parser.add_argument('--dataset_path', default='dataset', type=str, help='Federated learning dataset path.')
 
     parser.add_argument('--n_clients', default=5, type=int, help='Number of clients')
