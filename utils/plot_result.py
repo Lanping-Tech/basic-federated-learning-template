@@ -14,6 +14,7 @@ def plot_result(metric_collection, n_rounds, results_dir):
     plot_graph(list(range(1, n_rounds+1)), metric_collection['val_loss'], label='Validation Accuracy')
     plt.legend()
     plt.savefig(os.path.join(results_dir, "federated_model_Accuracy.png"))
+    plt.cla()
 
     plt.figure(figsize=(10, 6))
     plot_graph(list(range(1, n_rounds+1)), metric_collection['train_loss'], label='Train Loss')
